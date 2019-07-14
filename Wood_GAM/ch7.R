@@ -87,3 +87,20 @@ apsi$alpha
 apl <- bam(death~s(time,bs="cr",k=200)+te(pm10,lag,k=c(10,5))+
              te(o3,tmp,lag,k=c(8,8,5)),family=poisson,data=dat)
 
+#------
+## 7.7.2 Cairo temperature
+data(cairo)
+ctamm <- gamm(temp~s(day.of.year,bs="cc",k=20)+s(time,bs="cr"),
+              data=cairo,correlation=corAR1(form=~1|year))
+summary(ctamm$gam)
+intervals(ctamm$lme,which="var-cov")
+ctamm$gam$sig2/ctamm$gam$sp
+plot(ctamm$gam,scale=0,pages=1)
+
+REML <- rho <- 0.6+0:20/100
+for (i in 1:length(rho)) {
+  ctbam <- bam(temp~s(day.of.year,bs="cc",k=20)+s(time,bs="cr"),
+               data=cairo,rho=rho[i])
+  REML[i] <- ctbam$gcv.ubre
+}
+rho[REML==min(REML)]
