@@ -104,3 +104,17 @@ for (i in 1:length(rho)) {
   REML[i] <- ctbam$gcv.ubre
 }
 rho[REML==min(REML)]
+
+
+
+#ch7 exercises
+library(gamair)
+library(mgcv)
+data(hubble)
+hub.mod <- lm(y ~ x - 1, data=hubble)
+summary(hub.mod)
+k=1
+b = gam(y~ s(x), data = hubble)
+gam.check(b)
+plot(b,residuals=TRUE,n=1000, cex = 5)
+qq.gam(b, cex = 5)
