@@ -185,6 +185,7 @@ plot(er$day,er$ast);lines(te,pd$ast)
 
 #-------
 # ch7 exercises
+# 1
 library(gamair)
 library(mgcv)
 data(hubble)
@@ -195,4 +196,43 @@ b = gam(y~ s(x), data = hubble)
 gam.check(b)
 plot(b,residuals=TRUE,n=1000, cex = 5)
 qq.gam(b, cex = 5)
+h0 <- gam(y~x,data=hubble)
+b
+AIC(h0, b)
 
+
+gam.check(b) # oh dear
+h2 <- gam(y~s(x),data=hubble,family=quasi(var=mu))
+gam.check(h2) # not great, but better
+h2
+# The residual plots for h1 are problematic: there is a clear relationship between
+# the mean and the variance. Perhaps a quasi-likelihood approach might solve
+# this. m2 does have somewhat better residual plots, although they are still not
+# perfect. All evidence for departure from Hubble’s law has now vanished.
+
+# 2
+library(MASS)
+mcycle = mcycle
+plot(mcycle$times, mcycle$accel)
+mcycle0 = gam(accel~s(times, k = 30), data = mcycle, method = "GCV.Cp")
+plot(mcycle0,  residuals = T, n = 1000, cex = 5, se = FALSE)
+mcycle0
+
+mcycle_lin <- lm(accel~ poly(times,11), data = mcycle)
+plot(mcycle_lin, residuals = TRUE, n=1000, cex = 5)
+termplot(mcycle_lin, partial.resid = T, rug = T)
+
+mcycle0_unpenal = gam(accel~s(times), data = mcycle, method = "GCV.Cp")
+plot(mcycle0_unpenal,  residuals = T, n = 1000, cex = 5, se = FALSE)
+mcycle0_unpenal
+
+mcycle0_unpenal_cubic = gam(accel~s(times, bs = "cc"), data = mcycle, method = "GCV.Cp")
+plot(mcycle0_unpenal_cubic,  residuals = T, n = 1000, cex = 5, se = FALSE)
+mcycle0_unpenal_cubic
+
+length(mcycle$times)
+mcycle$weights[1:133] = 0
+mcycle$weights[1:20] = 2
+mcycle0_unpenal_cubic_weight = gam(accel~s(times, bs = "cc", weight = mcycle$weights), data = mcycle, method = "GCV.Cp")
+plot(mcycle0_unpenal_cubic_weight,  residuals = T, n = 1000, cex = 5, se = FALSE)
+mcycle0_unpenal_cubic_weight
